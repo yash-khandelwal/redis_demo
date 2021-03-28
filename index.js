@@ -9,6 +9,22 @@ const redisClient = redis.createClient(REDIS_PORT);
 
 const app = express();
 
+// Cache middleware
+const cacheRepos = (req, res, next) => {
+    const { userName } = req.params;
+    redisClient.get(userName, (err, repos) => {
+        if(err) {
+            console.log(err.message);
+            next();
+        }
+        if(repos !== null){
+            res.send(`<h2>${userName} has ${repos} public repos</h2>`);
+        } else {
+            next();
+        }
+    })
+}
+
 const getRepos = async (req, res, next) => {
     try{
         console.log('Fetching Data from the database...');
@@ -24,7 +40,7 @@ const getRepos = async (req, res, next) => {
     }
 }
 
-app.get('/repos/:userName', getRepos);
+app.get('/repos/:userName', cacheRepos, getRepos);
 
 app.listen(PORT, () => {
     console.log(`App is running on port: ${PORT}`);
