@@ -16,6 +16,8 @@ const getRepos = async (req, res, next) => {
         const response = await fetch(`https://api.github.com/users/${userName}`);
         const data = await response.json();
         const repos = data.public_repos;
+        // Set data to Redis
+        redisClient.setex(userName, 90, repos);
         res.send(`<h2>${userName} has ${repos} public repos</h2>`);
     } catch (error) {
         console.log(error);
