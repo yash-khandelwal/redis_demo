@@ -15,7 +15,8 @@ const getRepos = async (req, res, next) => {
         const { userName } = req.params;
         const response = await fetch(`https://api.github.com/users/${userName}`);
         const data = await response.json();
-        res.send(data);
+        const repos = data.public_repos;
+        res.send(`<h2>${userName} has ${repos} public repos</h2>`);
     } catch (error) {
         console.log(error);
     }
