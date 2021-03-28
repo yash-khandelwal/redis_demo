@@ -9,6 +9,10 @@ const redisClient = redis.createClient(REDIS_PORT);
 
 const app = express();
 
+const setResponse = (userName, repos) => {
+    return `<h2>${userName} has ${repos} public repos</h2>`;
+}
+
 // Cache middleware
 const cacheRepos = (req, res, next) => {
     const { userName } = req.params;
@@ -18,7 +22,8 @@ const cacheRepos = (req, res, next) => {
             next();
         }
         if(repos !== null){
-            res.send(`<h2>${userName} has ${repos} public repos</h2>`);
+            console.log("Found Data in the Cache...");
+            res.status(200).send(setResponse(userName, repos));
         } else {
             next();
         }
@@ -34,7 +39,7 @@ const getRepos = async (req, res, next) => {
         const repos = data.public_repos;
         // Set data to Redis
         redisClient.setex(userName, 90, repos);
-        res.send(`<h2>${userName} has ${repos} public repos</h2>`);
+        res.status(200).send(setResponse(userName, repos));
     } catch (error) {
         console.log(error);
     }
